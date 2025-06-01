@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Save, Calendar, BookOpen } from 'lucide-react';
+import { Save, Calendar, BookOpen, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { saveEntry, getEntryByDate } from '@/lib/storage';
 
@@ -19,12 +19,9 @@ const WriteEntry: React.FC<WriteEntryProps> = ({ editEntry, onSave }) => {
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
-  const [dailyGoals, setDailyGoals] = useState(['', '', '', '']);
-  const [studyToday, setStudyToday] = useState(['', '', '', '']);
-  const [mustDo, setMustDo] = useState(['', '', '', '']);
-  const [dailyGoalsChecked, setDailyGoalsChecked] = useState([false, false, false, false]);
-  const [studyTodayChecked, setStudyTodayChecked] = useState([false, false, false, false]);
-  const [mustDoChecked, setMustDoChecked] = useState([false, false, false, false]);
+  const [dailyGoals, setDailyGoals] = useState([{ text: '', checked: false }]);
+  const [studyToday, setStudyToday] = useState([{ text: '', checked: false }]);
+  const [mustDo, setMustDo] = useState([{ text: '', checked: false }]);
   const [motivationalQuote, setMotivationalQuote] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -33,45 +30,65 @@ const WriteEntry: React.FC<WriteEntryProps> = ({ editEntry, onSave }) => {
       setDate(editEntry.date);
       setTitle(editEntry.title);
       setBody(editEntry.body);
-      setDailyGoals(editEntry.dailyGoals || ['', '', '', '']);
-      setStudyToday(editEntry.studyToday || ['', '', '', '']);
-      setMustDo(editEntry.mustDo || ['', '', '', '']);
-      setDailyGoalsChecked(editEntry.dailyGoalsChecked || [false, false, false, false]);
-      setStudyTodayChecked(editEntry.studyTodayChecked || [false, false, false, false]);
-      setMustDoChecked(editEntry.mustDoChecked || [false, false, false, false]);
+      setDailyGoals(editEntry.dailyGoals || [{ text: '', checked: false }]);
+      setStudyToday(editEntry.studyToday || [{ text: '', checked: false }]);
+      setMustDo(editEntry.mustDo || [{ text: '', checked: false }]);
       setMotivationalQuote(editEntry.motivationalQuote || '');
     }
   }, [editEntry]);
 
+  const addGoal = (type: 'daily' | 'study' | 'must') => {
+    if (type === 'daily') {
+      setDailyGoals([...dailyGoals, { text: '', checked: false }]);
+    } else if (type === 'study') {
+      setStudyToday([...studyToday, { text: '', checked: false }]);
+    } else {
+      setMustDo([...mustDo, { text: '', checked: false }]);
+    }
+  };
+
+  const removeGoal = (index: number, type: 'daily' | 'study' | 'must') => {
+    if (type === 'daily') {
+      const newGoals = dailyGoals.filter((_, i) => i !== index);
+      setDailyGoals(newGoals.length ? newGoals : [{ text: '', checked: false }]);
+    } else if (type === 'study') {
+      const newGoals = studyToday.filter((_, i) => i !== index);
+      setStudyToday(newGoals.length ? newGoals : [{ text: '', checked: false }]);
+    } else {
+      const newGoals = mustDo.filter((_, i) => i !== index);
+      setMustDo(newGoals.length ? newGoals : [{ text: '', checked: false }]);
+    }
+  };
+
   const handleGoalChange = (index: number, value: string, type: 'daily' | 'study' | 'must') => {
     if (type === 'daily') {
       const newGoals = [...dailyGoals];
-      newGoals[index] = value;
+      newGoals[index].text = value;
       setDailyGoals(newGoals);
     } else if (type === 'study') {
       const newGoals = [...studyToday];
-      newGoals[index] = value;
+      newGoals[index].text = value;
       setStudyToday(newGoals);
     } else {
       const newGoals = [...mustDo];
-      newGoals[index] = value;
+      newGoals[index].text = value;
       setMustDo(newGoals);
     }
   };
 
   const handleCheckboxChange = (index: number, checked: boolean, type: 'daily' | 'study' | 'must') => {
     if (type === 'daily') {
-      const newChecked = [...dailyGoalsChecked];
-      newChecked[index] = checked;
-      setDailyGoalsChecked(newChecked);
+      const newGoals = [...dailyGoals];
+      newGoals[index].checked = checked;
+      setDailyGoals(newGoals);
     } else if (type === 'study') {
-      const newChecked = [...studyTodayChecked];
-      newChecked[index] = checked;
-      setStudyTodayChecked(newChecked);
+      const newGoals = [...studyToday];
+      newGoals[index].checked = checked;
+      setStudyToday(newGoals);
     } else {
-      const newChecked = [...mustDoChecked];
-      newChecked[index] = checked;
-      setMustDoChecked(newChecked);
+      const newGoals = [...mustDo];
+      newGoals[index].checked = checked;
+      setMustDo(newGoals);
     }
   };
 
@@ -92,9 +109,6 @@ const WriteEntry: React.FC<WriteEntryProps> = ({ editEntry, onSave }) => {
         dailyGoals,
         studyToday,
         mustDo,
-        dailyGoalsChecked,
-        studyTodayChecked,
-        mustDoChecked,
         motivationalQuote: motivationalQuote.trim(),
         createdAt: editEntry?.createdAt || new Date().toISOString(),
         updatedAt: new Date().toISOString()
@@ -108,12 +122,9 @@ const WriteEntry: React.FC<WriteEntryProps> = ({ editEntry, onSave }) => {
       if (!editEntry) {
         setTitle('');
         setBody('');
-        setDailyGoals(['', '', '', '']);
-        setStudyToday(['', '', '', '']);
-        setMustDo(['', '', '', '']);
-        setDailyGoalsChecked([false, false, false, false]);
-        setStudyTodayChecked([false, false, false, false]);
-        setMustDoChecked([false, false, false, false]);
+        setDailyGoals([{ text: '', checked: false }]);
+        setStudyToday([{ text: '', checked: false }]);
+        setMustDo([{ text: '', checked: false }]);
         setMotivationalQuote('');
       }
       
@@ -131,25 +142,46 @@ const WriteEntry: React.FC<WriteEntryProps> = ({ editEntry, onSave }) => {
 
   const renderGoalSection = (
     title: string, 
-    goals: string[], 
-    checked: boolean[], 
+    goals: { text: string; checked: boolean }[], 
     type: 'daily' | 'study' | 'must'
   ) => (
     <div className="space-y-3">
-      <h4 className="font-semibold text-sm text-foreground">{title}</h4>
+      <div className="flex items-center justify-between">
+        <h4 className="font-semibold text-sm text-foreground">{title}</h4>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => addGoal(type)}
+          className="h-6 w-6 p-0 bg-white/50 hover:bg-white/70"
+        >
+          <Plus className="w-3 h-3" />
+        </Button>
+      </div>
       {goals.map((goal, index) => (
         <div key={index} className="flex items-center space-x-2">
           <span className="text-sm font-medium text-muted-foreground w-4">{index + 1})</span>
           <Checkbox
-            checked={checked[index]}
+            checked={goal.checked}
             onCheckedChange={(checkedState) => handleCheckboxChange(index, !!checkedState, type)}
           />
           <Input
-            value={goal}
+            value={goal.text}
             onChange={(e) => handleGoalChange(index, e.target.value, type)}
             placeholder={`Goal ${index + 1}`}
-            className="text-sm bg-white/50"
+            className="text-sm bg-white/50 flex-1"
           />
+          {goals.length > 1 && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => removeGoal(index, type)}
+              className="h-6 w-6 p-0 bg-white/50 hover:bg-red-100 border-red-200"
+            >
+              <Trash2 className="w-3 h-3 text-red-500" />
+            </Button>
+          )}
         </div>
       ))}
     </div>
@@ -218,19 +250,19 @@ const WriteEntry: React.FC<WriteEntryProps> = ({ editEntry, onSave }) => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
               <Card className="bg-white/30 border-white/40">
                 <CardContent className="p-3 sm:p-4">
-                  {renderGoalSection('Daily goals', dailyGoals, dailyGoalsChecked, 'daily')}
+                  {renderGoalSection('Daily goals', dailyGoals, 'daily')}
                 </CardContent>
               </Card>
               
               <Card className="bg-white/30 border-white/40">
                 <CardContent className="p-3 sm:p-4">
-                  {renderGoalSection('Study today', studyToday, studyTodayChecked, 'study')}
+                  {renderGoalSection('Study today', studyToday, 'study')}
                 </CardContent>
               </Card>
               
               <Card className="bg-white/30 border-white/40">
                 <CardContent className="p-3 sm:p-4">
-                  {renderGoalSection('Must do today', mustDo, mustDoChecked, 'must')}
+                  {renderGoalSection('Must do today', mustDo, 'must')}
                 </CardContent>
               </Card>
             </div>

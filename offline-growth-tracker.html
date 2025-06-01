@@ -1,0 +1,791 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Growth Tracker - Offline</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #f0fdf4 0%, #e6fffa 100%);
+            min-height: 100vh;
+            color: #1f2937;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        .typing-text {
+            overflow: hidden;
+            border-right: 2px solid #22c55e;
+            white-space: nowrap;
+            animation: typing 3s steps(40, end);
+        }
+
+        /* Welcome Screen */
+        .welcome-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+        }
+
+        .welcome-title {
+            font-size: clamp(2rem, 8vw, 4rem);
+            font-weight: bold;
+            background: linear-gradient(135deg, #059669, #0d9488);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 2rem;
+        }
+
+        /* Options Menu */
+        .options-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .option-card {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            padding: 2rem;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .option-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .option-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: #059669;
+        }
+
+        /* Form Styles */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .form-input, .form-textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.5);
+            font-size: 0.875rem;
+        }
+
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .goals-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .goal-section {
+            background: rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .goal-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .goal-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .goal-input {
+            flex: 1;
+            padding: 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.5);
+            font-size: 0.875rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #22c55e, #3b82f6);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #16a34a, #2563eb);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.5);
+            color: #374151;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.7);
+        }
+
+        .btn-small {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+        }
+
+        .btn-icon {
+            width: 24px;
+            height: 24px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #10b981;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 6px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.error {
+            background: #ef4444;
+        }
+
+        .entry-list {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .entry-item {
+            background: rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 8px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .entry-item:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        .entry-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .entry-date {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .entry-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .entry-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .website-list {
+            display: grid;
+            gap: 1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .website-item {
+            background: rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .website-item h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+            color: #059669;
+        }
+
+        .checkbox {
+            width: 16px;
+            height: 16px;
+            margin-right: 8px;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+            
+            .typing-text {
+                animation: none;
+                border-right: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Back Button -->
+    <button id="backBtn" class="btn btn-secondary back-btn hidden" onclick="showSection('options')">← Home</button>
+
+    <!-- Toast Container -->
+    <div id="toast" class="toast"></div>
+
+    <div class="container">
+        <!-- Welcome Screen -->
+        <div id="welcome" class="welcome-screen">
+            <h1 class="welcome-title typing-text">Welcome To My Growth Tracker</h1>
+        </div>
+
+        <!-- Options Menu -->
+        <div id="options" class="hidden">
+            <div class="welcome-screen">
+                <h1 class="welcome-title">My Growth Tracker</h1>
+                <div class="options-menu">
+                    <div class="option-card fade-in" onclick="showSection('write')">
+                        <h3>📝 Write Today's Entry</h3>
+                        <p>Capture your thoughts and track your daily goals</p>
+                    </div>
+                    <div class="option-card fade-in" onclick="showSection('past')">
+                        <h3>📚 View Past Entries</h3>
+                        <p>Read and manage your previous journal entries</p>
+                    </div>
+                    <div class="option-card fade-in" onclick="showSection('websites')">
+                        <h3>🌐 Check Our New Website</h3>
+                        <p>Discover new resources and tools</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Write Entry Section -->
+        <div id="write" class="hidden">
+            <div class="glass-card">
+                <h2>📝 Write Today's Entry</h2>
+                <form id="entryForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="entryDate">Date</label>
+                            <input type="date" id="entryDate" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="entryTitle">Title</label>
+                            <input type="text" id="entryTitle" class="form-input" placeholder="What's on your mind today?" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="entryBody">Write here what happened today</label>
+                        <textarea id="entryBody" class="form-textarea" placeholder="Pour your heart out here..." required></textarea>
+                    </div>
+
+                    <div class="goals-grid">
+                        <div class="goal-section">
+                            <div class="goal-header">
+                                <h4>Daily Goals</h4>
+                                <button type="button" class="btn btn-secondary btn-small btn-icon" onclick="addGoal('daily')">+</button>
+                            </div>
+                            <div id="dailyGoals">
+                                <div class="goal-item">
+                                    <span>1)</span>
+                                    <input type="checkbox" class="checkbox">
+                                    <input type="text" class="goal-input" placeholder="Goal 1">
+                                    <button type="button" class="btn btn-danger btn-small btn-icon" onclick="removeGoal(this, 'daily')" style="display: none;">×</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="goal-section">
+                            <div class="goal-header">
+                                <h4>Study Today</h4>
+                                <button type="button" class="btn btn-secondary btn-small btn-icon" onclick="addGoal('study')">+</button>
+                            </div>
+                            <div id="studyGoals">
+                                <div class="goal-item">
+                                    <span>1)</span>
+                                    <input type="checkbox" class="checkbox">
+                                    <input type="text" class="goal-input" placeholder="Goal 1">
+                                    <button type="button" class="btn btn-danger btn-small btn-icon" onclick="removeGoal(this, 'study')" style="display: none;">×</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="goal-section">
+                            <div class="goal-header">
+                                <h4>Must Do Today</h4>
+                                <button type="button" class="btn btn-secondary btn-small btn-icon" onclick="addGoal('must')">+</button>
+                            </div>
+                            <div id="mustDoGoals">
+                                <div class="goal-item">
+                                    <span>1)</span>
+                                    <input type="checkbox" class="checkbox">
+                                    <input type="text" class="goal-input" placeholder="Goal 1">
+                                    <button type="button" class="btn btn-danger btn-small btn-icon" onclick="removeGoal(this, 'must')" style="display: none;">×</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="motivationalQuote">A motivational quote</label>
+                        <textarea id="motivationalQuote" class="form-textarea" placeholder="Share an inspiring quote that motivated you today..." style="min-height: 80px;"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">💾 Save Entry</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Past Entries Section -->
+        <div id="past" class="hidden">
+            <div class="glass-card">
+                <h2>📚 Past Entries</h2>
+                <div id="entriesList" class="entry-list">
+                    <p>No entries yet - let's write your first one!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Websites Section -->
+        <div id="websites" class="hidden">
+            <div class="glass-card">
+                <h2>🌐 New Websites</h2>
+                <div class="website-list">
+                    <div class="website-item">
+                        <h3>Website A</h3>
+                        <p>Coming Soon - Productivity Tools</p>
+                    </div>
+                    <div class="website-item">
+                        <h3>Website B</h3>
+                        <p>Coming Soon - Learning Resources</p>
+                    </div>
+                    <div class="website-item">
+                        <h3>Website C</h3>
+                        <p>Coming Soon - Goal Tracking</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentEditingId = null;
+        let goalCounters = { daily: 1, study: 1, must: 1 };
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set today's date
+            document.getElementById('entryDate').value = new Date().toISOString().split('T')[0];
+            
+            // Show welcome animation
+            setTimeout(() => {
+                showSection('options');
+            }, 3500);
+
+            // Form submission
+            document.getElementById('entryForm').addEventListener('submit', saveEntry);
+
+            // Load existing entries
+            loadEntries();
+        });
+
+        // Section management
+        function showSection(sectionName) {
+            // Hide all sections
+            const sections = ['welcome', 'options', 'write', 'past', 'websites'];
+            sections.forEach(section => {
+                document.getElementById(section).classList.add('hidden');
+            });
+
+            // Show target section
+            document.getElementById(sectionName).classList.remove('hidden');
+
+            // Show/hide back button
+            const backBtn = document.getElementById('backBtn');
+            if (sectionName === 'options' || sectionName === 'welcome') {
+                backBtn.classList.add('hidden');
+            } else {
+                backBtn.classList.remove('hidden');
+            }
+
+            // Load entries when showing past section
+            if (sectionName === 'past') {
+                loadEntries();
+            }
+
+            // Reset form when showing write section
+            if (sectionName === 'write' && !currentEditingId) {
+                resetForm();
+            }
+        }
+
+        // Goal management
+        function addGoal(type) {
+            const container = document.getElementById(type + 'Goals');
+            const goalCount = container.children.length + 1;
+            
+            const goalItem = document.createElement('div');
+            goalItem.className = 'goal-item';
+            goalItem.innerHTML = `
+                <span>${goalCount})</span>
+                <input type="checkbox" class="checkbox">
+                <input type="text" class="goal-input" placeholder="Goal ${goalCount}">
+                <button type="button" class="btn btn-danger btn-small btn-icon" onclick="removeGoal(this, '${type}')">×</button>
+            `;
+            
+            container.appendChild(goalItem);
+            updateGoalNumbers(type);
+            updateRemoveButtons(type);
+        }
+
+        function removeGoal(button, type) {
+            const container = document.getElementById(type + 'Goals');
+            if (container.children.length > 1) {
+                button.parentElement.remove();
+                updateGoalNumbers(type);
+                updateRemoveButtons(type);
+            }
+        }
+
+        function updateGoalNumbers(type) {
+            const container = document.getElementById(type + 'Goals');
+            Array.from(container.children).forEach((item, index) => {
+                item.querySelector('span').textContent = `${index + 1})`;
+                item.querySelector('.goal-input').placeholder = `Goal ${index + 1}`;
+            });
+        }
+
+        function updateRemoveButtons(type) {
+            const container = document.getElementById(type + 'Goals');
+            const removeButtons = container.querySelectorAll('.btn-danger');
+            removeButtons.forEach(btn => {
+                btn.style.display = container.children.length > 1 ? 'flex' : 'none';
+            });
+        }
+
+        // Entry management
+        function saveEntry(e) {
+            e.preventDefault();
+            
+            const entry = {
+                id: currentEditingId || generateId(),
+                date: document.getElementById('entryDate').value,
+                title: document.getElementById('entryTitle').value,
+                body: document.getElementById('entryBody').value,
+                dailyGoals: getGoals('daily'),
+                studyGoals: getGoals('study'),
+                mustDoGoals: getGoals('must'),
+                motivationalQuote: document.getElementById('motivationalQuote').value,
+                createdAt: currentEditingId ? getEntryById(currentEditingId).createdAt : new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+
+            try {
+                const entries = getEntries();
+                const existingIndex = entries.findIndex(e => e.id === entry.id);
+                
+                if (existingIndex >= 0) {
+                    entries[existingIndex] = entry;
+                } else {
+                    entries.push(entry);
+                }
+                
+                localStorage.setItem('growthTracker_entries', JSON.stringify(entries));
+                
+                showToast(currentEditingId ? 'Entry updated successfully!' : 'Entry saved successfully!');
+                currentEditingId = null;
+                
+                setTimeout(() => {
+                    showSection('past');
+                }, 1000);
+                
+            } catch (error) {
+                showToast('Failed to save entry', 'error');
+            }
+        }
+
+        function getGoals(type) {
+            const container = document.getElementById(type + 'Goals');
+            const goals = [];
+            
+            Array.from(container.children).forEach(item => {
+                const checkbox = item.querySelector('.checkbox');
+                const input = item.querySelector('.goal-input');
+                goals.push({
+                    text: input.value,
+                    checked: checkbox.checked
+                });
+            });
+            
+            return goals;
+        }
+
+        function loadEntries() {
+            const entries = getEntries().sort((a, b) => new Date(b.date) - new Date(a.date));
+            const container = document.getElementById('entriesList');
+            
+            if (entries.length === 0) {
+                container.innerHTML = '<p>No entries yet - let\'s write your first one!</p>';
+                return;
+            }
+            
+            container.innerHTML = entries.map(entry => `
+                <div class="entry-item" onclick="expandEntry('${entry.id}')">
+                    <div class="entry-header">
+                        <div class="entry-date">${formatDate(entry.date)}</div>
+                        <div class="entry-actions">
+                            <button class="btn btn-secondary btn-small" onclick="event.stopPropagation(); editEntry('${entry.id}')">Edit</button>
+                            <button class="btn btn-danger btn-small" onclick="event.stopPropagation(); deleteEntry('${entry.id}')">Delete</button>
+                        </div>
+                    </div>
+                    <div class="entry-title">${entry.title}</div>
+                    <div class="entry-preview">${entry.body.substring(0, 100)}${entry.body.length > 100 ? '...' : ''}</div>
+                </div>
+            `).join('');
+        }
+
+        function editEntry(id) {
+            const entry = getEntryById(id);
+            if (!entry) return;
+            
+            currentEditingId = id;
+            
+            // Populate form
+            document.getElementById('entryDate').value = entry.date;
+            document.getElementById('entryTitle').value = entry.title;
+            document.getElementById('entryBody').value = entry.body;
+            document.getElementById('motivationalQuote').value = entry.motivationalQuote || '';
+            
+            // Load goals
+            loadGoalsToForm('daily', entry.dailyGoals || []);
+            loadGoalsToForm('study', entry.studyGoals || []);
+            loadGoalsToForm('must', entry.mustDoGoals || []);
+            
+            showSection('write');
+        }
+
+        function loadGoalsToForm(type, goals) {
+            const container = document.getElementById(type + 'Goals');
+            container.innerHTML = '';
+            
+            if (goals.length === 0) {
+                goals = [{ text: '', checked: false }];
+            }
+            
+            goals.forEach((goal, index) => {
+                const goalItem = document.createElement('div');
+                goalItem.className = 'goal-item';
+                goalItem.innerHTML = `
+                    <span>${index + 1})</span>
+                    <input type="checkbox" class="checkbox" ${goal.checked ? 'checked' : ''}>
+                    <input type="text" class="goal-input" placeholder="Goal ${index + 1}" value="${goal.text}">
+                    <button type="button" class="btn btn-danger btn-small btn-icon" onclick="removeGoal(this, '${type}')" style="display: ${goals.length > 1 ? 'flex' : 'none'};">×</button>
+                `;
+                container.appendChild(goalItem);
+            });
+        }
+
+        function deleteEntry(id) {
+            if (confirm('Are you sure you want to delete this entry?')) {
+                try {
+                    const entries = getEntries().filter(e => e.id !== id);
+                    localStorage.setItem('growthTracker_entries', JSON.stringify(entries));
+                    loadEntries();
+                    showToast('Entry deleted successfully!');
+                } catch (error) {
+                    showToast('Failed to delete entry', 'error');
+                }
+            }
+        }
+
+        function expandEntry(id) {
+            const entry = getEntryById(id);
+            if (!entry) return;
+            
+            alert(`${entry.title}\n\n${entry.body}\n\nMotivational Quote: ${entry.motivationalQuote || 'None'}`);
+        }
+
+        function resetForm() {
+            document.getElementById('entryForm').reset();
+            document.getElementById('entryDate').value = new Date().toISOString().split('T')[0];
+            
+            // Reset goals
+            ['daily', 'study', 'must'].forEach(type => {
+                const container = document.getElementById(type + 'Goals');
+                container.innerHTML = `
+                    <div class="goal-item">
+                        <span>1)</span>
+                        <input type="checkbox" class="checkbox">
+                        <input type="text" class="goal-input" placeholder="Goal 1">
+                        <button type="button" class="btn btn-danger btn-small btn-icon" onclick="removeGoal(this, '${type}')" style="display: none;">×</button>
+                    </div>
+                `;
+            });
+            
+            currentEditingId = null;
+        }
+
+        // Utility functions
+        function getEntries() {
+            try {
+                return JSON.parse(localStorage.getItem('growthTracker_entries') || '[]');
+            } catch {
+                return [];
+            }
+        }
+
+        function getEntryById(id) {
+            return getEntries().find(entry => entry.id === id);
+        }
+
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2);
+        }
+
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleDateString();
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Check for reduced motion preference
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            setTimeout(() => {
+                showSection('options');
+            }, 100);
+        }
+    </script>
+</body>
+</html>
