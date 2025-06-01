@@ -23,11 +23,11 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onComplete }) => {
   }, [onComplete]);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4">
-      <div className="text-center max-w-4xl mx-auto">
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8">
+      <div className="text-center max-w-6xl mx-auto w-full">
         {showWelcome && (
           <h1 
-            className={`text-5xl md:text-7xl font-bold gradient-text mb-8 ${
+            className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold gradient-text mb-4 sm:mb-6 md:mb-8 leading-tight ${
               showWelcome ? 'typing-text' : 'opacity-0'
             }`}
           >
@@ -36,8 +36,8 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onComplete }) => {
         )}
         
         {showOptions && (
-          <div className="space-y-6 animate-fade-in">
-            <p className="text-xl text-muted-foreground mb-12">
+          <div className="space-y-4 sm:space-y-6 animate-fade-in">
+            <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-8 sm:mb-10 md:mb-12 px-2">
               Choose your path to personal growth
             </p>
           </div>
