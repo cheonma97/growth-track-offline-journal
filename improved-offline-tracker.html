@@ -1,0 +1,1266 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Growth Tracker - Enhanced Offline Version</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #2d3748;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .fade-in {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        @keyframes blink {
+            0%, 50% { border-color: #48bb78; }
+            51%, 100% { border-color: transparent; }
+        }
+
+        .typing-text {
+            overflow: hidden;
+            border-right: 3px solid #48bb78;
+            white-space: nowrap;
+            animation: typing 3s steps(50, end), blink 1s step-end infinite;
+        }
+
+        /* Welcome Screen */
+        .welcome-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .welcome-title {
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            font-weight: 800;
+            background: linear-gradient(135deg, #48bb78, #38b2ac);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 2rem;
+            text-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .welcome-subtitle {
+            font-size: clamp(1rem, 3vw, 1.5rem);
+            color: #ffffff;
+            opacity: 0.9;
+            margin-top: 1rem;
+        }
+
+        /* Enhanced Glass Card */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.1);
+            padding: 2.5rem;
+            margin: 1.5rem 0;
+            transition: all 0.3s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 35px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Enhanced Options Menu */
+        .options-menu {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .option-card {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 2.5rem;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .option-card:hover::before {
+            left: 100%;
+        }
+
+        .option-card:hover {
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 30px 50px rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .option-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .option-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        .option-card p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1rem;
+        }
+
+        /* Enhanced Form Styles */
+        .form-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .form-header h2 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #48bb78, #38b2ac);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-header p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+            color: #ffffff;
+            font-size: 1rem;
+        }
+
+        .form-input, .form-textarea {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            font-size: 1rem;
+            color: #ffffff;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .form-input:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #48bb78;
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 0 3px rgba(72, 187, 120, 0.1);
+        }
+
+        .form-input::placeholder, .form-textarea::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .form-textarea {
+            min-height: 140px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Enhanced Goals Section */
+        .goals-section {
+            margin: 3rem 0;
+        }
+
+        .goals-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .goals-header h3 {
+            font-size: 2rem;
+            color: #ffffff;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .goals-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .goal-section {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 16px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .goal-section:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .goal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .goal-header h4 {
+            font-size: 1.25rem;
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .goal-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .goal-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .goal-number {
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 600;
+            min-width: 20px;
+        }
+
+        .goal-input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            font-size: 0.9rem;
+            color: #ffffff;
+            transition: all 0.2s ease;
+        }
+
+        .goal-input:focus {
+            outline: none;
+            border-color: #48bb78;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .goal-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Enhanced Buttons */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #48bb78, #38b2ac);
+            color: white;
+            box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(72, 187, 120, 0.4);
+            background: linear-gradient(135deg, #38a169, #319795);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        .btn-icon {
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #f56565, #e53e3e);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #e53e3e, #c53030);
+            transform: translateY(-1px);
+        }
+
+        .btn-add {
+            background: linear-gradient(135deg, #48bb78, #38b2ac);
+            color: white;
+            font-size: 1.25rem;
+        }
+
+        /* Navigation */
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Enhanced Toast */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #2d3748;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            transform: translateX(120%);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            font-weight: 600;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.error {
+            background: rgba(245, 101, 101, 0.95);
+            color: white;
+        }
+
+        .toast.success {
+            background: rgba(72, 187, 120, 0.95);
+            color: white;
+        }
+
+        /* Enhanced Entry List */
+        .entry-list {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .entry-item {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .entry-item:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .entry-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .entry-date {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
+        }
+
+        .entry-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: #ffffff;
+        }
+
+        .entry-preview {
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.6;
+        }
+
+        .entry-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        /* Website List */
+        .website-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .website-item {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 2.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .website-item:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .website-item h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #48bb78;
+            font-weight: 700;
+        }
+
+        .website-item p {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        /* Checkbox Styling */
+        .checkbox {
+            width: 20px;
+            height: 20px;
+            accent-color: #48bb78;
+            border-radius: 4px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .glass-card {
+                padding: 1.5rem;
+                border-radius: 16px;
+            }
+            
+            .goals-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .options-menu {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-header h2 {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .welcome-title {
+                font-size: 2.5rem;
+            }
+            
+            .option-card {
+                padding: 2rem;
+            }
+            
+            .goal-section {
+                padding: 1rem;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #ffffff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Accessibility */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+            
+            .typing-text {
+                animation: none;
+                border-right: none;
+            }
+        }
+
+        /* Enhanced scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <!-- Back Button -->
+    <button id="backBtn" class="btn btn-secondary back-btn hidden" onclick="showSection('options')">
+        ← Back to Home
+    </button>
+
+    <!-- Toast Container -->
+    <div id="toast" class="toast"></div>
+
+    <div class="container">
+        <!-- Welcome Screen -->
+        <div id="welcome" class="welcome-screen">
+            <h1 class="welcome-title typing-text">Welcome To My Growth Tracker</h1>
+            <p class="welcome-subtitle fade-in">Track your daily progress and achieve your goals</p>
+        </div>
+
+        <!-- Options Menu -->
+        <div id="options" class="hidden">
+            <div class="welcome-screen">
+                <h1 class="welcome-title">My Growth Tracker</h1>
+                <p class="welcome-subtitle">Choose what you'd like to do today</p>
+                <div class="options-menu">
+                    <div class="option-card fade-in" onclick="showSection('write')">
+                        <span class="option-icon">✍️</span>
+                        <h3>Write Today's Entry</h3>
+                        <p>Capture your thoughts, set goals, and reflect on your day</p>
+                    </div>
+                    <div class="option-card fade-in" onclick="showSection('past')">
+                        <span class="option-icon">📖</span>
+                        <h3>View Past Entries</h3>
+                        <p>Read and manage your previous journal entries and track progress</p>
+                    </div>
+                    <div class="option-card fade-in" onclick="showSection('websites')">
+                        <span class="option-icon">🌐</span>
+                        <h3>Discover Resources</h3>
+                        <p>Explore new tools and websites to enhance your growth journey</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Write Entry Section -->
+        <div id="write" class="hidden">
+            <div class="glass-card">
+                <div class="form-header">
+                    <h2>✍️ Today's Growth Entry</h2>
+                    <p>Document your journey and set meaningful goals for today</p>
+                </div>
+                
+                <form id="entryForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="entryDate">📅 Date</label>
+                            <input type="date" id="entryDate" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="entryTitle">📝 Entry Title</label>
+                            <input type="text" id="entryTitle" class="form-input" placeholder="What's on your mind today?" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="entryBody">💭 Daily Reflection</label>
+                        <textarea id="entryBody" class="form-textarea" placeholder="Share your thoughts, experiences, and insights from today..." required></textarea>
+                    </div>
+
+                    <div class="goals-section">
+                        <div class="goals-header">
+                            <h3>🎯 Today's Goals & Tasks</h3>
+                            <p>Organize your priorities and track your progress</p>
+                        </div>
+
+                        <div class="goals-grid">
+                            <div class="goal-section">
+                                <div class="goal-header">
+                                    <h4>🌟 Daily Goals</h4>
+                                    <button type="button" class="btn btn-add btn-icon" onclick="addGoal('daily')" title="Add Goal">+</button>
+                                </div>
+                                <div id="dailyGoals">
+                                    <div class="goal-item">
+                                        <span class="goal-number">1.</span>
+                                        <input type="checkbox" class="checkbox">
+                                        <input type="text" class="goal-input" placeholder="Enter your first daily goal...">
+                                        <button type="button" class="btn btn-danger btn-icon" onclick="removeGoal(this, 'daily')" style="display: none;" title="Remove Goal">×</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="goal-section">
+                                <div class="goal-header">
+                                    <h4>📚 Study Goals</h4>
+                                    <button type="button" class="btn btn-add btn-icon" onclick="addGoal('study')" title="Add Study Goal">+</button>
+                                </div>
+                                <div id="studyGoals">
+                                    <div class="goal-item">
+                                        <span class="goal-number">1.</span>
+                                        <input type="checkbox" class="checkbox">
+                                        <input type="text" class="goal-input" placeholder="What will you study today?">
+                                        <button type="button" class="btn btn-danger btn-icon" onclick="removeGoal(this, 'study')" style="display: none;" title="Remove Goal">×</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="goal-section">
+                                <div class="goal-header">
+                                    <h4>⚡ Must Do Today</h4>
+                                    <button type="button" class="btn btn-add btn-icon" onclick="addGoal('must')" title="Add Priority Task">+</button>
+                                </div>
+                                <div id="mustDoGoals">
+                                    <div class="goal-item">
+                                        <span class="goal-number">1.</span>
+                                        <input type="checkbox" class="checkbox">
+                                        <input type="text" class="goal-input" placeholder="What's your top priority today?">
+                                        <button type="button" class="btn btn-danger btn-icon" onclick="removeGoal(this, 'must')" style="display: none;" title="Remove Goal">×</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="motivationalQuote">💡 Daily Inspiration</label>
+                        <textarea id="motivationalQuote" class="form-textarea" placeholder="Share a quote, affirmation, or thought that inspires you today..." style="min-height: 100px;"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 1rem; font-size: 1.1rem;">
+                        <span class="loading hidden"></span>
+                        <span id="saveText">💾 Save My Growth Entry</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Past Entries Section -->
+        <div id="past" class="hidden">
+            <div class="glass-card">
+                <div class="form-header">
+                    <h2>📖 My Growth Journey</h2>
+                    <p>Reflect on your progress and celebrate your achievements</p>
+                </div>
+                <div id="entriesList" class="entry-list">
+                    <div class="entry-item">
+                        <p style="text-align: center; color: rgba(255, 255, 255, 0.8); font-size: 1.1rem;">
+                            🌱 No entries yet - start your growth journey today!
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Websites Section -->
+        <div id="websites" class="hidden">
+            <div class="glass-card">
+                <div class="form-header">
+                    <h2>🌐 Growth Resources</h2>
+                    <p>Discover tools and websites to enhance your personal development</p>
+                </div>
+                <div class="website-list">
+                    <div class="website-item">
+                        <h3>🎯 Goal Setting Hub</h3>
+                        <p>Advanced tools and techniques for setting and achieving meaningful goals</p>
+                    </div>
+                    <div class="website-item">
+                        <h3>📚 Learning Center</h3>
+                        <p>Curated resources for continuous learning and skill development</p>
+                    </div>
+                    <div class="website-item">
+                        <h3>🧘 Mindfulness Space</h3>
+                        <p>Meditation guides and mindfulness practices for mental well-being</p>
+                    </div>
+                    <div class="website-item">
+                        <h3>📊 Progress Analytics</h3>
+                        <p>Advanced tracking and visualization tools for monitoring your growth</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentEditingId = null;
+        let isLoading = false;
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set today's date
+            document.getElementById('entryDate').value = new Date().toISOString().split('T')[0];
+            
+            // Show welcome animation
+            setTimeout(() => {
+                if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                    showSection('options');
+                } else {
+                    showSection('options');
+                }
+            }, 4000);
+
+            // Form submission
+            document.getElementById('entryForm').addEventListener('submit', saveEntry);
+
+            // Load existing entries
+            loadEntries();
+
+            // Add keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                if (e.ctrlKey || e.metaKey) {
+                    if (e.key === 's') {
+                        e.preventDefault();
+                        const form = document.getElementById('entryForm');
+                        if (!form.classList.contains('hidden')) {
+                            saveEntry(e);
+                        }
+                    }
+                    if (e.key === 'h') {
+                        e.preventDefault();
+                        showSection('options');
+                    }
+                }
+            });
+        });
+
+        // Section management
+        function showSection(sectionName) {
+            // Hide all sections with fade out
+            const sections = ['welcome', 'options', 'write', 'past', 'websites'];
+            sections.forEach(section => {
+                const element = document.getElementById(section);
+                element.classList.add('hidden');
+            });
+
+            // Show target section with fade in
+            setTimeout(() => {
+                const targetSection = document.getElementById(sectionName);
+                targetSection.classList.remove('hidden');
+                
+                // Add fade-in animation
+                const animatedElements = targetSection.querySelectorAll('.fade-in, .option-card, .glass-card');
+                animatedElements.forEach((el, index) => {
+                    el.style.animationDelay = `${index * 0.1}s`;
+                });
+            }, 100);
+
+            // Show/hide back button
+            const backBtn = document.getElementById('backBtn');
+            if (sectionName === 'options' || sectionName === 'welcome') {
+                backBtn.classList.add('hidden');
+            } else {
+                backBtn.classList.remove('hidden');
+            }
+
+            // Load entries when showing past section
+            if (sectionName === 'past') {
+                loadEntries();
+            }
+
+            // Reset form when showing write section
+            if (sectionName === 'write' && !currentEditingId) {
+                resetForm();
+            }
+        }
+
+        // Enhanced goal management
+        function addGoal(type) {
+            const container = document.getElementById(type + 'Goals');
+            const goalCount = container.children.length + 1;
+            
+            const goalItem = document.createElement('div');
+            goalItem.className = 'goal-item';
+            goalItem.style.opacity = '0';
+            goalItem.style.transform = 'translateY(20px)';
+            
+            goalItem.innerHTML = `
+                <span class="goal-number">${goalCount}.</span>
+                <input type="checkbox" class="checkbox">
+                <input type="text" class="goal-input" placeholder="Goal ${goalCount}">
+                <button type="button" class="btn btn-danger btn-icon" onclick="removeGoal(this, '${type}')" title="Remove Goal">×</button>
+            `;
+            
+            container.appendChild(goalItem);
+            
+            // Animate in
+            setTimeout(() => {
+                goalItem.style.transition = 'all 0.3s ease';
+                goalItem.style.opacity = '1';
+                goalItem.style.transform = 'translateY(0)';
+            }, 10);
+            
+            updateGoalNumbers(type);
+            updateRemoveButtons(type);
+            
+            // Focus the new input
+            goalItem.querySelector('.goal-input').focus();
+        }
+
+        function removeGoal(button, type) {
+            const container = document.getElementById(type + 'Goals');
+            if (container.children.length > 1) {
+                const goalItem = button.parentElement;
+                
+                // Animate out
+                goalItem.style.transition = 'all 0.3s ease';
+                goalItem.style.opacity = '0';
+                goalItem.style.transform = 'translateY(-20px)';
+                
+                setTimeout(() => {
+                    goalItem.remove();
+                    updateGoalNumbers(type);
+                    updateRemoveButtons(type);
+                }, 300);
+            } else {
+                showToast('You must have at least one goal!', 'error');
+            }
+        }
+
+        function updateGoalNumbers(type) {
+            const container = document.getElementById(type + 'Goals');
+            Array.from(container.children).forEach((item, index) => {
+                const numberSpan = item.querySelector('.goal-number');
+                const input = item.querySelector('.goal-input');
+                if (numberSpan) numberSpan.textContent = `${index + 1}.`;
+                if (input && input.placeholder.startsWith('Goal')) {
+                    input.placeholder = `Goal ${index + 1}`;
+                }
+            });
+        }
+
+        function updateRemoveButtons(type) {
+            const container = document.getElementById(type + 'Goals');
+            const removeButtons = container.querySelectorAll('.btn-danger');
+            removeButtons.forEach(btn => {
+                btn.style.display = container.children.length > 1 ? 'flex' : 'none';
+            });
+        }
+
+        // Enhanced entry management
+        function saveEntry(e) {
+            e.preventDefault();
+            
+            if (isLoading) return;
+            
+            const title = document.getElementById('entryTitle').value.trim();
+            const body = document.getElementById('entryBody').value.trim();
+            
+            if (!title || !body) {
+                showToast('Please fill in both title and content!', 'error');
+                return;
+            }
+            
+            isLoading = true;
+            updateSaveButton(true);
+            
+            const entry = {
+                id: currentEditingId || generateId(),
+                date: document.getElementById('entryDate').value,
+                title: title,
+                body: body,
+                dailyGoals: getGoals('daily'),
+                studyGoals: getGoals('study'),
+                mustDoGoals: getGoals('must'),
+                motivationalQuote: document.getElementById('motivationalQuote').value.trim(),
+                createdAt: currentEditingId ? getEntryById(currentEditingId).createdAt : new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+
+            try {
+                const entries = getEntries();
+                const existingIndex = entries.findIndex(e => e.id === entry.id);
+                
+                if (existingIndex >= 0) {
+                    entries[existingIndex] = entry;
+                } else {
+                    entries.push(entry);
+                }
+                
+                localStorage.setItem('growthTracker_entries', JSON.stringify(entries));
+                
+                showToast(currentEditingId ? 'Entry updated successfully! 🎉' : 'Entry saved successfully! 🎉', 'success');
+                currentEditingId = null;
+                
+                setTimeout(() => {
+                    isLoading = false;
+                    updateSaveButton(false);
+                    showSection('past');
+                }, 1500);
+                
+            } catch (error) {
+                showToast('Failed to save entry. Please try again.', 'error');
+                isLoading = false;
+                updateSaveButton(false);
+            }
+        }
+
+        function updateSaveButton(loading) {
+            const loadingSpinner = document.querySelector('.loading');
+            const saveText = document.getElementById('saveText');
+            
+            if (loading) {
+                loadingSpinner.classList.remove('hidden');
+                saveText.textContent = 'Saving...';
+            } else {
+                loadingSpinner.classList.add('hidden');
+                saveText.textContent = currentEditingId ? '✏️ Update Entry' : '💾 Save My Growth Entry';
+            }
+        }
+
+        function getGoals(type) {
+            const container = document.getElementById(type + 'Goals');
+            const goals = [];
+            
+            Array.from(container.children).forEach(item => {
+                const checkbox = item.querySelector('.checkbox');
+                const input = item.querySelector('.goal-input');
+                if (checkbox && input) {
+                    goals.push({
+                        text: input.value.trim(),
+                        checked: checkbox.checked
+                    });
+                }
+            });
+            
+            return goals;
+        }
+
+        function loadEntries() {
+            const entries = getEntries().sort((a, b) => new Date(b.date) - new Date(a.date));
+            const container = document.getElementById('entriesList');
+            
+            if (entries.length === 0) {
+                container.innerHTML = `
+                    <div class="entry-item">
+                        <p style="text-align: center; color: rgba(255, 255, 255, 0.8); font-size: 1.1rem;">
+                            🌱 No entries yet - start your growth journey today!
+                        </p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = entries.map((entry, index) => `
+                <div class="entry-item fade-in" style="animation-delay: ${index * 0.1}s;" onclick="expandEntry('${entry.id}')">
+                    <div class="entry-header">
+                        <div class="entry-date">📅 ${formatDate(entry.date)}</div>
+                        <div class="entry-actions">
+                            <button class="btn btn-secondary btn-small" onclick="event.stopPropagation(); editEntry('${entry.id}')" title="Edit Entry">✏️ Edit</button>
+                            <button class="btn btn-danger btn-small" onclick="event.stopPropagation(); deleteEntry('${entry.id}')" title="Delete Entry">🗑️ Delete</button>
+                        </div>
+                    </div>
+                    <div class="entry-title">${entry.title}</div>
+                    <div class="entry-preview">${entry.body.substring(0, 150)}${entry.body.length > 150 ? '...' : ''}</div>
+                    ${entry.motivationalQuote ? `<div style="margin-top: 1rem; font-style: italic; color: rgba(255, 255, 255, 0.8);">"${entry.motivationalQuote.substring(0, 100)}${entry.motivationalQuote.length > 100 ? '...' : ''}"</div>` : ''}
+                </div>
+            `).join('');
+        }
+
+        function editEntry(id) {
+            const entry = getEntryById(id);
+            if (!entry) return;
+            
+            currentEditingId = id;
+            
+            // Populate form
+            document.getElementById('entryDate').value = entry.date;
+            document.getElementById('entryTitle').value = entry.title;
+            document.getElementById('entryBody').value = entry.body;
+            document.getElementById('motivationalQuote').value = entry.motivationalQuote || '';
+            
+            // Load goals
+            loadGoalsToForm('daily', entry.dailyGoals || []);
+            loadGoalsToForm('study', entry.studyGoals || []);
+            loadGoalsToForm('must', entry.mustDoGoals || []);
+            
+            showSection('write');
+        }
+
+        function loadGoalsToForm(type, goals) {
+            const container = document.getElementById(type + 'Goals');
+            container.innerHTML = '';
+            
+            if (goals.length === 0) {
+                goals = [{ text: '', checked: false }];
+            }
+            
+            goals.forEach((goal, index) => {
+                const goalItem = document.createElement('div');
+                goalItem.className = 'goal-item';
+                goalItem.innerHTML = `
+                    <span class="goal-number">${index + 1}.</span>
+                    <input type="checkbox" class="checkbox" ${goal.checked ? 'checked' : ''}>
+                    <input type="text" class="goal-input" placeholder="Goal ${index + 1}" value="${goal.text}">
+                    <button type="button" class="btn btn-danger btn-icon" onclick="removeGoal(this, '${type}')" style="display: ${goals.length > 1 ? 'flex' : 'none'};" title="Remove Goal">×</button>
+                `;
+                container.appendChild(goalItem);
+            });
+        }
+
+        function deleteEntry(id) {
+            if (confirm('Are you sure you want to delete this entry? This action cannot be undone.')) {
+                try {
+                    const entries = getEntries().filter(e => e.id !== id);
+                    localStorage.setItem('growthTracker_entries', JSON.stringify(entries));
+                    loadEntries();
+                    showToast('Entry deleted successfully! 🗑️', 'success');
+                } catch (error) {
+                    showToast('Failed to delete entry', 'error');
+                }
+            }
+        }
+
+        function expandEntry(id) {
+            const entry = getEntryById(id);
+            if (!entry) return;
+            
+            const goalSections = [];
+            if (entry.dailyGoals && entry.dailyGoals.length > 0) {
+                goalSections.push('Daily Goals:\n' + entry.dailyGoals.map(g => `${g.checked ? '✅' : '⬜'} ${g.text}`).join('\n'));
+            }
+            if (entry.studyGoals && entry.studyGoals.length > 0) {
+                goalSections.push('Study Goals:\n' + entry.studyGoals.map(g => `${g.checked ? '✅' : '⬜'} ${g.text}`).join('\n'));
+            }
+            if (entry.mustDoGoals && entry.mustDoGoals.length > 0) {
+                goalSections.push('Must Do:\n' + entry.mustDoGoals.map(g => `${g.checked ? '✅' : '⬜'} ${g.text}`).join('\n'));
+            }
+            
+            const content = [
+                `📅 ${formatDate(entry.date)}`,
+                `\n📝 ${entry.title}`,
+                `\n💭 ${entry.body}`,
+                goalSections.length > 0 ? '\n🎯 ' + goalSections.join('\n\n') : '',
+                entry.motivationalQuote ? `\n💡 "${entry.motivationalQuote}"` : ''
+            ].filter(Boolean).join('\n');
+            
+            alert(content);
+        }
+
+        function resetForm() {
+            document.getElementById('entryForm').reset();
+            document.getElementById('entryDate').value = new Date().toISOString().split('T')[0];
+            
+            // Reset goals
+            ['daily', 'study', 'must'].forEach(type => {
+                const container = document.getElementById(type + 'Goals');
+                container.innerHTML = `
+                    <div class="goal-item">
+                        <span class="goal-number">1.</span>
+                        <input type="checkbox" class="checkbox">
+                        <input type="text" class="goal-input" placeholder="Goal 1">
+                        <button type="button" class="btn btn-danger btn-icon" onclick="removeGoal(this, '${type}')" style="display: none;" title="Remove Goal">×</button>
+                    </div>
+                `;
+            });
+            
+            currentEditingId = null;
+            updateSaveButton(false);
+        }
+
+        // Utility functions
+        function getEntries() {
+            try {
+                return JSON.parse(localStorage.getItem('growthTracker_entries') || '[]');
+            } catch {
+                return [];
+            }
+        }
+
+        function getEntryById(id) {
+            return getEntries().find(entry => entry.id === id);
+        }
+
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2);
+        }
+
+        function formatDate(dateString) {
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            return new Date(dateString).toLocaleDateString(undefined, options);
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Check for reduced motion preference and skip welcome animation
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            document.addEventListener('DOMContentLoaded', function() {
+                setTimeout(() => {
+                    showSection('options');
+                }, 500);
+            });
+        }
+
+        // Add some fun easter eggs
+        let clickCount = 0;
+        document.addEventListener('click', function() {
+            clickCount++;
+            if (clickCount === 50) {
+                showToast('Wow! You\'ve been busy! 🎉', 'success');
+            }
+        });
+
+        // Auto-save functionality (optional)
+        let autoSaveTimeout;
+        function enableAutoSave() {
+            const inputs = document.querySelectorAll('#entryForm input, #entryForm textarea');
+            inputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    clearTimeout(autoSaveTimeout);
+                    autoSaveTimeout = setTimeout(() => {
+                        // Auto-save logic could go here
+                        console.log('Auto-saving...');
+                    }, 5000);
+                });
+            });
+        }
+
+        // Initialize auto-save when form is shown
+        document.addEventListener('DOMContentLoaded', enableAutoSave);
+    </script>
+</body>
+</html>
